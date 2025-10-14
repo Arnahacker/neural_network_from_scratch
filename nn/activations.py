@@ -1,5 +1,5 @@
 import numpy as np
-from layer import Layer
+from layers import Layer
 
 class Activation(Layer):
     def __init__(self, activation, activation_diff):
@@ -12,3 +12,4 @@ class Activation(Layer):
 
     def backward(self, output_gradient, learning_rate):
         return np.multiply(output_gradient, self.activation_diff(self.input))
+
