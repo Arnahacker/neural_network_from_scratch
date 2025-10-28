@@ -1,21 +1,21 @@
-# 🧠 Neural Network From Scratch (NumPy)
+# Neural Network From Scratch (NumPy)
 
 A fully-from-scratch implementation of a **neural network in Python using NumPy** — including forward propagation, backpropagation, and gradient descent — built to understand deep learning fundamentals without any frameworks.  
 Tested on **XOR**, **Make Moons**, **Iris**, **MNIST**, and **Sine Curve regression** examples.
 
 ---
 
-## 🚀 Overview
+## Overview
 
 This project demonstrates the inner workings of a neural network — from the math of gradient descent to the code behind activations and losses.  
 Every layer, weight update, and derivative is manually implemented for complete transparency.
 
-### 🎯 Goal
+### Goal
 To **learn deep learning by building it**, not by using black-box libraries.
 
 ---
 
-## 🧩 Key Features
+## Key Features
 - Build and train neural networks **from scratch** using NumPy  
 - Implement **forward and backward propagation** manually  
 - Support for **dense layers**, **activations**, **losses**, and **optimizers**  
@@ -51,7 +51,7 @@ neural-network-from-scratch/
 ```
 
 
-## 📊 Example Datasets
+## Example Datasets
 
 | Example | Dataset | Type | Goal |
 |----------|----------|------|------|
