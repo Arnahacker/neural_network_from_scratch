@@ -1,4 +1,6 @@
-
+import numpy as np
+from layers import Layer
+from optimizers import optimizers
 
 class SGD(optimizers):
     def __init__(self, lr=0.01):
