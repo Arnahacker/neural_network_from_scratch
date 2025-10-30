@@ -2,7 +2,7 @@ import numpy as np
 from nn.dense import Dense
 from nn.optimizers_functions import Adam,SGDMomentum
 from nn.model import NeuralNetwork
-from nn.loss import mse_diff,mse
+from nn.loss import mse_diff,mse,binary_cross_entropy,binary_cross_entropy_diff
 from nn.activation_function import Tanh,Sigmoid
 
 # XOR dataset
@@ -15,10 +15,10 @@ model = NeuralNetwork([
     Tanh(),
     Dense(4, 1),
     Sigmoid()
-], loss=mse, loss_prime=mse_diff)
+], loss=binary_cross_entropy, loss_prime=binary_cross_entropy_diff)
 
 # Initialize optimizer
-optimizer = SGDMomentum(lr=.001)
+optimizer = Adam(lr=.01)
 
 # Train
 model.fit(x_train, y_train, epochs=500, optimizer=optimizer, verbose=True)
