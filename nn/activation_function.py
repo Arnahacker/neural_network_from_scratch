@@ -1,14 +1,14 @@
 import numpy as np
-from layers import Layer
-from activations import Activation
+from .layers import Layer
+from .activations import Activation
 
 class Tanh(Activation):
     def __init__(self):
         def tanh(x):
             return np.tanh(x)
 
-        def tanh_prime(x):
-            return 1 - np.tanh(x) ** 2
+        def tanh_prime(output):  
+            return 1 - output ** 2
 
         super().__init__(tanh, tanh_prime)
 
@@ -22,24 +22,32 @@ class ReLU(Activation):
 
         super().__init__(relu, relu_prime)
 
-
 class Sigmoid(Activation):
     def __init__(self):
         def sigmoid(x):
             return 1 / (1 + np.exp(-x))
 
-        def sigmoid_prime(x):
-            s = sigmoid(x)
-            return s * (1 - s)
+        def sigmoid_prime(output):
+            return output * (1 - output)
 
         super().__init__(sigmoid, sigmoid_prime)
 
+
 class Softmax(Layer):
     def forward(self, input):
-        tmp = np.exp(input)
-        self.output = tmp / np.sum(tmp)
+        # numerical stability: subtract max
+        exps = np.exp(input - np.max(input, axis=0, keepdims=True))
+        self.output = exps / np.sum(exps, axis=0, keepdims=True)
         return self.output
     
     def backward(self, output_gradient, learning_rate):
-        tmp = np.tile(self.output, n)
-        return np.dot(tmp * (np.identity(n) - np.transpose(tmp)), output_gradient)
+        s = self.output  
+        if s.ndim == 2 and s.shape[1] == 1:
+            jacobian = np.diagflat(s.flatten()) - np.outer(s.flatten(), s.flatten())
+            return np.dot(jacobian, output_gradient).reshape(s.shape)
+        grads = []
+        for i in range(s.shape[1]):
+            si = s[:, i:i+1]
+            jac = np.diagflat(si.flatten()) - np.outer(si.flatten(), si.flatten())
+            grads.append(np.dot(jac, output_gradient[:, i:i+1]))
+        return np.hstack(grads)

@@ -1,6 +1,5 @@
 import numpy as np
-from layers import Layer
-from optimizers import Optimizer
+from .optimizers import Optimizer
 
 class SGD(Optimizer):
     def __init__(self, lr=0.01):
@@ -39,42 +38,58 @@ class SGDMomentum(Optimizer):
 
 
 class RMSProp(Optimizer):
-    def __init__(self, learning_rate=0.001, beta=0.9, epsilon=1e-8):
-        self.lr = learning_rate
+    def __init__(self, lr=0.001, beta=0.9, epsilon=1e-8):
+        super().__init__(lr)
         self.beta = beta
         self.eps = epsilon
-        self.sq_grad = None
+        # per-layer state
+        self.sq_grad = {}
 
-    def update(self, params, grads):
-        if self.sq_grad is None:
-            self.sq_grad = [np.zeros_like(g) for g in grads]
-
-        for i in range(len(params)):
-            self.sq_grad[i] = self.beta * self.sq_grad[i] + (1 - self.beta) * grads[i] ** 2
-            params[i] -= self.lr * grads[i] / (np.sqrt(self.sq_grad[i]) + self.eps)
+    def step(self, layers):
+        for layer in layers:
+            if getattr(layer, "weights_gradient", None) is None:
+                continue
+            if layer not in self.sq_grad:
+                self.sq_grad[layer] = [
+                    np.zeros_like(layer.weights_gradient),
+                    np.zeros_like(layer.bias_gradient),
+                ]
+            params = [layer.weights, layer.bias]
+            grads = [layer.weights_gradient, layer.bias_gradient]
+            for i in range(len(params)):
+                self.sq_grad[layer][i] = (
+                    self.beta * self.sq_grad[layer][i] + (1 - self.beta) * grads[i] ** 2
+                )
+                params[i] -= self.lr * grads[i] / (np.sqrt(self.sq_grad[layer][i]) + self.eps)
 
 
 class Adam(Optimizer):
-    def __init__(self, learning_rate=0.001, beta1=0.9, beta2=0.999, epsilon=1e-8):
-        self.lr = learning_rate
+    def __init__(self, lr=1e-5, beta1=0.9, beta2=0.999, epsilon=1e-8):
+        super().__init__(lr)
         self.beta1 = beta1
         self.beta2 = beta2
         self.eps = epsilon
-        self.m = None
-        self.v = None
-        self.t = 0
+        # per-layer states
+        self.m = {}
+        self.v = {}
+        self.t = {}
 
-    def update(self, params, grads):
-        if self.m is None:
-            self.m = [np.zeros_like(g) for g in grads]
-            self.v = [np.zeros_like(g) for g in grads]
-
-        self.t += 1
-        for i in range(len(params)):
-            self.m[i] = self.beta1 * self.m[i] + (1 - self.beta1) * grads[i]
-            self.v[i] = self.beta2 * self.v[i] + (1 - self.beta2) * (grads[i] ** 2)
-            m_hat = self.m[i] / (1 - self.beta1 ** self.t)
-            v_hat = self.v[i] / (1 - self.beta2 ** self.t)
-            params[i] -= self.lr * m_hat / (np.sqrt(v_hat) + self.eps)
+    def step(self, layers):
+        for layer in layers:
+            if getattr(layer, "weights_gradient", None) is None:
+                continue
+            if layer not in self.m:
+                self.m[layer] = [np.zeros_like(layer.weights_gradient), np.zeros_like(layer.bias_gradient)]
+                self.v[layer] = [np.zeros_like(layer.weights_gradient), np.zeros_like(layer.bias_gradient)]
+                self.t[layer] = 0
+            params = [layer.weights, layer.bias]
+            grads = [layer.weights_gradient, layer.bias_gradient]
+            self.t[layer] += 1
+            for i in range(len(params)):
+                self.m[layer][i] = self.beta1 * self.m[layer][i] + (1 - self.beta1) * grads[i]
+                self.v[layer][i] = self.beta2 * self.v[layer][i] + (1 - self.beta2) * (grads[i] ** 2)
+                m_hat = self.m[layer][i] / (1 - self.beta1 ** self.t[layer])
+                v_hat = self.v[layer][i] / (1 - self.beta2 ** self.t[layer])
+                params[i] -= self.lr * m_hat / (np.sqrt(v_hat) + self.eps)
 
 

@@ -3,5 +3,5 @@ class Optimizer:
         self.lr = lr
 
     def step(self, layers):
-      passs
+      pass
 

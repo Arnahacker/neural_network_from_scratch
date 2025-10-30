@@ -1,6 +1,6 @@
 import numpy as np
 from nn.dense import Dense
-from nn.optimizers_functions import Adam
+from nn.optimizers_functions import Adam,SGDMomentum
 from nn.model import NeuralNetwork
 from nn.loss import mse_diff,mse
 from nn.activation_function import Tanh,Sigmoid
@@ -18,7 +18,7 @@ model = NeuralNetwork([
 ], loss=mse, loss_prime=mse_diff)
 
 # Initialize optimizer
-optimizer = Adam(lr=0.01)
+optimizer = SGDMomentum(lr=.001)
 
 # Train
 model.fit(x_train, y_train, epochs=500, optimizer=optimizer, verbose=True)
