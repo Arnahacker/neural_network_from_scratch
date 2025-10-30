@@ -41,7 +41,6 @@ class NeuralNetwork:
                 print(f"Epoch {epoch + 1}/{epochs}, Loss: {error:.6f}")
 
     def predict(self, x_data):
-        """Predict output for given input data."""
         results = []
         for x in x_data:
             x = np.reshape(x, (x.shape[0], 1))
@@ -49,7 +48,6 @@ class NeuralNetwork:
         return results
 
     def evaluate(self, x_test, y_test):
-        """Evaluate average loss on test data."""
         loss_sum = 0
         for x, y in zip(x_test, y_test):
             x = np.reshape(x, (x.shape[0], 1))
@@ -57,3 +55,4 @@ class NeuralNetwork:
             output = self.forward(x)
             loss_sum += self.loss(y, output)
         return loss_sum / len(x_test)
+
